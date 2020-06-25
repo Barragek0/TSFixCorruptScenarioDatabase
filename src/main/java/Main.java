@@ -63,8 +63,6 @@ public class Main
 
 	static ArrayList<WorkshopFile> toRemove = new ArrayList<WorkshopFile>();
 
-	private static List<String> workshopScenarioIds = new ArrayList<>();
-
 	private static List<WorkshopFile> workshopNamesToCompare = new ArrayList<>(), workshopNames = new ArrayList<>();
 
 	final static SwingProgressBar progressBar = new SwingProgressBar();
@@ -96,17 +94,6 @@ public class Main
 				e.printStackTrace();
 			}
 		}));
-		File workshopFile = new File(baseDirectory + "/workshop.txt");
-		Scanner s = new Scanner(workshopFile);
-		while (s.hasNextLine())
-		{
-			String current = s.nextLine();
-			current = current.split("\\|\\|")[0];
-			current = Utilities.replaceLast(current, " ", "");
-			workshopNames.add(new WorkshopFile(current, null));
-			log.info("-> " + current);
-		}
-		s.close();
 
 		LookAndFeel.setLookAndFeel("Nimbus");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -137,6 +124,20 @@ public class Main
 			}
 		});
 		progressBar.setProgressBarIndeterminate(true);
+
+		progressBar.updateStatus("Scraping scenario names & ids from steam workshop...");
+		WorkshopScraper.start();
+		File workshopFile = new File(baseDirectory + "/workshop.txt");
+		Scanner s = new Scanner(workshopFile);
+		while (s.hasNextLine())
+		{
+			String current = s.nextLine();
+			current = current.split("\\|\\|")[0];
+			current = Utilities.replaceLast(current, " ", "");
+			workshopNames.add(new WorkshopFile(current, null));
+			log.info("-> " + current);
+		}
+		s.close();
 
 		if (!Variables.testing)
 		{
@@ -424,6 +425,7 @@ public class Main
 			}
 			startStage(4);
 			progressBar.setProgressBarIndeterminate(true);
+			startStage(5);
 			if (!corruptRoutesDirectory.exists())
 			{
 				corruptRoutesDirectory.mkdirs();
@@ -957,12 +959,6 @@ public class Main
 									processNode(tempNode.getChildNodes(), file, 2, node);
 								}
 								break;
-							case SCENARIO_ID:
-								if (tempNode.getNodeName().equalsIgnoreCase("ID"))
-								{
-									processNode(tempNode.getChildNodes(), file, 2, node);
-								}
-								break;
 						}
 					}
 				}
@@ -984,12 +980,6 @@ public class Main
 								break;
 							case DISPLAY_NAME:
 								if (tempNode.getNodeName().equalsIgnoreCase("Localisation-cUserLocalisedString"))
-								{
-									processNode(tempNode.getChildNodes(), file, 3, node);
-								}
-								break;
-							case SCENARIO_ID:
-								if (tempNode.getNodeName().equalsIgnoreCase("cGUID"))
 								{
 									processNode(tempNode.getChildNodes(), file, 3, node);
 								}
@@ -1029,13 +1019,6 @@ public class Main
 								{
 									workshopNamesToCompare.add(new WorkshopFile(tempNode.getTextContent(), file));
 									//	log.info("Added Display Name -> {}", tempNode.getTextContent());
-								}
-								break;
-							case SCENARIO_ID:
-								if (tempNode.getNodeName().equalsIgnoreCase("DevString"))
-								{
-									workshopScenarioIds.add(tempNode.getTextContent());
-									//	log.info("Added ID -> {}", tempNode.getTextContent());
 								}
 								break;
 						}

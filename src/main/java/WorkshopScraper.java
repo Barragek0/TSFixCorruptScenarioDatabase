@@ -53,7 +53,7 @@ public class WorkshopScraper
 	static int amountOfRuns;
 	static int numberOfFiles;
 
-	public static void main(String[] args) throws InterruptedException
+	public static void start() throws InterruptedException
 	{
 		for (int i = 0; i < totalWorkshopPages; i++)
 		{
@@ -78,7 +78,7 @@ public class WorkshopScraper
 			Thread.sleep(100);
 		}
 		System.out.println("Finished first stage");
-		splitFileIntoMultiple();
+		/*splitFileIntoMultiple();
 		for (int i = 0; i < numberOfFiles; i++)
 		{
 			int finalI = i;
@@ -106,7 +106,7 @@ public class WorkshopScraper
 				}
 			});
 			t.start();
-		}
+		}*/ //no longer used
 
 	}
 
@@ -171,33 +171,6 @@ public class WorkshopScraper
 			e.printStackTrace();
 		}
 		return result;
-	}
-
-	private static void act(Document doc, int i, int amountOfRuns) throws IOException
-	{
-			String pageContent = doc.body().toString();
-			String pageContentEdited = pageContent.substring(pageContent.indexOf("#scnr{"), pageContent.length());
-			pageContentEdited = pageContentEdited.substring(6, pageContentEdited.indexOf("}"));
-		new File(Main.baseDirectory + "/Workshop/").mkdirs();
-			Path path = Paths.get(Main.baseDirectory + "/workshop" + amountOfRuns + ".txt");
-			Charset charset = StandardCharsets.UTF_8;
-
-			String content = new String(Files.readAllBytes(path), charset);
-			String replaceWith = ids.get(i) + " || " + pageContentEdited;
-			if (content.contains(ids.get(i)) && !content.contains(pageContentEdited))
-			{
-				System.out.println("" + replaceWith);
-				content = content.replaceAll("" + ids.get(i), replaceWith);
-				Files.write(path, content.getBytes(charset));
-			}
-			else
-			{
-				//System.out.println("couldn't find " + ids.get(i) + " sleeping and retrying in a little while");
-				//Thread.sleep(10000);
-				//currentI--;
-			}
-		System.out.println("Times ran: " + timesRan);
-		timesRan++;
 	}
 
 	private static void startThread(int i) throws InterruptedException, IOException
